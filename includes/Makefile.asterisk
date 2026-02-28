@@ -1,0 +1,83 @@
+ASTCFGFILES=$(CONFDIR)/asterisk.extip $(CONFDIR)/asterisk.aripass $(CONFDIR)/asterisk.ariuser $(CONFDIR)/asterisk.httpbind $(CONFDIR)/asterisk.defpeeruser $(CONFDIR)/asterisk.defpeerpass
+ASTYAML=$(GROUPVARS)/all/asterisk.yaml
+PEERSYAML=$(GROUPVARS)/all/pjpeers.yaml
+EXTRAPEERS=$(CONFDIR)/additionalpeers.yaml
+
+.PHONY: asterisk
+asterisk: $(ASTYAML) $(PEERSYAML)
+	@echo "Current asterisk config:"
+	@echo " - External IP (for PJSIP): $$(cat $(CONFDIR)/asterisk.extip)"
+	@echo " - Asterisk ARI Username: $$(cat $(CONFDIR)/asterisk.ariuser)"
+	@echo " - Asterisk ARI Password: $$(cat $(CONFDIR)/asterisk.aripass)"
+	@echo " - Asterisk HTTP Bind: $$(cat $(CONFDIR)/asterisk.httpbind)"
+	@echo " - PJSIP Default peer username: $$(cat $(CONFDIR)/asterisk.defpeeruser)"
+	@echo " - PJSIP Default peer password: $$(cat $(CONFDIR)/asterisk.defpeerpass)"
+	@echo ""
+	@echo "Run \`make astextip\` to update the Asterisk External IP address"
+	@echo "Run \`make bindall\` to allow access from a remote machine"
+	@echo "  (Delete the file $(CONFDIR)/asterisk.httpbind to set it back to localonly)"
+	@echo ""
+	@echo "Edit the file $(EXTRAPEERS) to add additional PJSIP peers"
+	@echo ""
+	@echo "Run \`make astinstall\` to install or update asterisk on this machine"
+	@echo "Run \`make astupdate\` to only update core asterisk files, after astinstall has been run at least once"
+
+.PHONY: astinstall
+astinstall: $(ASTYAML) $(PEERSYAML)
+	@echo Installing asterisk on localhost
+	ansible-playbook -i localhost, asterisk.yml -e uagent=$(UAGENT)
+
+.PHONY: astupdate
+astupdate: $(ASTYAML) $(PEERSYAML)
+	@echo Updating core asterisk config files only
+	ansible-playbook -i localhost, asterisk.yml -e fastupdate=true -e uagent=$(UAGENT)
+
+# Only create this if it doesn't exist
+$(EXTRAPEERS):
+	cp defaults/additionalpeers.yaml $@
+	
+$(PEERSYAML): $(EXTRAPEERS)
+	@echo Updating $@
+	@cp $< $@
+
+$(ASTYAML): $(ASTCFGFILES)
+	@echo 'astvars:' > $@
+	@for s in $(ASTCFGFILES); do echo "  $${s##*.}: '$$(cat $$s)'"; done >> $@
+
+.PHONY: astextip
+astextip $(CONFDIR)/asterisk.extip:
+	@MYIPS=$$(ip -o addr | egrep -v '(\ lo|\ docker)' | awk '/inet / { print $$4 }' | cut -d/ -f1 | paste -sd ','); \
+		echo "Known IPs on this system: $$MYIPS"; \
+		CUR=$$(cat $(CONFDIR)/asterisk.extip 2>/dev/null); \
+		if [ "$$CUR" ]; then \
+			PR="External IP Address for SIP (Currently $$CUR): "; else \
+			CUR=$$(echo $$MYIPS | cut -d, -f1); \
+			PR="External IP Address for SIP (Default $$CUR): "; \
+		fi; \
+		read -e -p "$$PR" i; \
+		if [ ! "$$i" ]; then i=$$CUR; fi; \
+		echo "Setting asterisk external ip to be $$i"; \
+		echo $$i > $(CONFDIR)/asterisk.extip
+
+$(CONFDIR)/asterisk.ariuser:
+	@echo asterisk > $@
+
+# Generates a uuid and takes the last 15 chars, which should always
+# be the 'most' random.
+$(CONFDIR)/asterisk.aripass: | /usr/bin/uuid
+	@uuid | cut -c25- > $@
+
+$(CONFDIR)/asterisk.defpeeruser: | /usr/bin/uuid
+	@uuid | cut -c25- > $@
+
+$(CONFDIR)/asterisk.defpeerpass: | /usr/bin/uuid
+	@uuid | tr -d '-' > $@
+
+.PHONY: bindall
+bindall:
+	@echo Updating httpbind to bind to all interfaces
+	@echo 0.0.0.0 > $(CONFDIR)/asterisk.httpbind
+	@make $(ASTYAML)
+
+$(CONFDIR)/asterisk.httpbind:
+	@echo 127.0.0.1 > $(CONFDIR)/asterisk.httpbind

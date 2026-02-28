@@ -1,0 +1,51 @@
+AVANET=8bebd2d4b348e9b3
+
+SKEYS=$(GROUPVARS)/all/ssh_keys
+
+SKEYNAMES=$(addsuffix .keys,$(GITHUBKEYS))
+SKEYDEST=$(addprefix $(CONFDIR)/,$(SKEYNAMES))
+
+ZTIDENT=/var/lib/zerotier-one/identity.public
+
+.PHONY: support support-up support-down support-purge support-info
+support:
+	@echo "Support Commands:"
+	@echo "  make support-up    -- Prepares this machine to be accessed by support"
+	@echo ""
+	@echo "Support status:"
+	@if [ -e $(CONFDIR)/support-enabled ]; then echo "  - SSH support keys enabled"; else echo "  - SSH Support keys not enabled"; fi
+	@if [ -e /usr/sbin/zerotier-cli ]; then echo "  - Zerotier installed (Your Random HostID: $$(cat $(ZTIDENT) | cut -d : -f 1))"; else echo "  - Zerotier not installed"; fi
+	@if [ -e /usr/sbin/zerotier-cli ]; then NETS=$$(/usr/sbin/zerotier-cli listnetworks | grep $(AVANET) | cut -d\  -f6-); if [ ! "$$NETS" ]; then echo "  - ERR: No support network (Run 'make support-up')"; else echo "  - $$NETS"; fi; fi
+	@if [ -e /usr/sbin/zerotier-cli ]; then echo "    Hint: If the line above says 'ACCESS_DENIED', please provide your HostID to support to have it authorized"; fi
+
+support-up: $(ZTIDENT)
+	@echo Enabling support ssh keys
+	@touch $(CONFDIR)/support-enabled
+	@$(MAKE) ssh
+
+
+$(ZTIDENT): /usr/sbin/zerotier-cli
+	@echo Looking for $@
+
+/usr/sbin/zerotier-cli: | $(ANSDIR)/scripts/zerotier.sh
+	@$|
+
+support-down:
+	@echo Support down
+
+support-purge:
+	@echo Purging support
+
+
+.PHONY: ssh
+ssh $(SKEYS): $(SKEYDEST)
+	@echo 'sshkeys:' > $(SKEYS)
+	@if [ -e $(CONFDIR)/support-enabled ]; then for x in $(SKEYDEST); do echo "  - $$(cat $$x) $$(basename $$x)" >> $(SKEYS); done; fi
+
+$(CONFDIR)/%.keys:
+	@wget --quiet https://github.com/$*.keys -O $@
+	@if [ ! -s "$@" ]; then (echo "ERROR! Support ssh key file $@ is empty. Check network connectivity!"; rm -f $@; exit 9); fi
+
+
+
+

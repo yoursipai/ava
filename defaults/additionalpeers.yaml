@@ -1,0 +1,9 @@
+# Add additional peers in this file
+---
+pjpeers:
+  - name: Peer1
+    host: 10.10.10.10
+    authuser:
+    authpass:
+    aicontext:
+    aiprovider:

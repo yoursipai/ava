@@ -1,0 +1,13 @@
+
+CFYAML=$(GROUPVARS)/all/cloudflare.yaml
+
+cloudflare: $(CFYAML)
+
+$(CFYAML): $(ANSDIR)/config/cloudflare-ipv4 $(ANSDIR)/config/cloudflare-ipv6
+	@(echo -e "---\ncloudflareips:"; for f in $^; do for ip in $$(cat $$f); do echo "  - \"$$ip\" "; done; done) > $@
+	@echo Created cloudflare yaml file $@
+
+$(ANSDIR)/config/cloudflare-ipv%:
+	wget -O $@ 'https://www.cloudflare.com/ips-v$*/'
+
+

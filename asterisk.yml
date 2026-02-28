@@ -1,0 +1,6 @@
+# Role that only install asterisk and asterisk config files
+---
+- hosts: localhost
+  roles:
+    - asterisk
+

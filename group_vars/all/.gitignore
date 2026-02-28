@@ -1,0 +1,5 @@
+# These are created by the Makefile and is used by the Apache role
+cloudflare.yaml
+ssh_keys
+asterisk.yaml
+pjpeers.yaml

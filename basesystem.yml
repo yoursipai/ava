@@ -1,0 +1,7 @@
+# Basic role for the local machine.
+---
+- hosts: localhost
+  roles:
+    - ubuntu-base
+    - docker
+
