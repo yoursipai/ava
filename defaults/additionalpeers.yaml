@@ -1,16 +1,11 @@
 # Add additional peers in this file - config/additionalpeers.yaml
 #   If you are editing defaults/additionalpeers.yaml, that will
 #   not work!
-# This file is processed to generate the pjsip config files. The
-# 'pjpeerdefaults' section is for the default peer, as well as
-# any other peers defined later
+#
+# Note that there are default settings in 'pjpeerdefaults.yaml', too
+# that set context, provider, and inboundcontext if not provided
+# here.
 ---
-pjpeerdefaults:
-  aicontext: default
-  aiprovider: local
-  allowaioverride: true
-  inboundcontext: to-ai
-
 pjpeers:
   - name: Peer1
     host: 10.10.10.10
@@ -19,3 +14,4 @@ pjpeers:
     aicontext:
     aiprovider:
     inboundcontext:
+    disabled: true

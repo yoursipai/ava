@@ -2,9 +2,12 @@ ASTCFGFILES=$(CONFDIR)/asterisk.extip $(CONFDIR)/asterisk.aripass $(CONFDIR)/ast
 ASTYAML=$(GROUPVARS)/all/asterisk.yaml
 PEERSYAML=$(GROUPVARS)/all/pjpeers.yaml
 EXTRAPEERS=$(CONFDIR)/additionalpeers.yaml
+PJPEERDEFAULTS=$(CONFDIR)/pjpeerdefaults.yaml
+PJDEFYAML=$(GROUPVARS)/all/pjpeerdefaults.yaml
+ASTGROUPVARS=$(ASTYAML) $(PEERSYAML) $(PJDEFYAML)
 
 .PHONY: asterisk
-asterisk: $(ASTYAML) $(PEERSYAML)
+asterisk: $(ASTGROUPVARS)
 	@echo "Current asterisk config:"
 	@echo " - External IP (for PJSIP): $$(cat $(CONFDIR)/asterisk.extip)"
 	@echo " - Asterisk ARI Username: $$(cat $(CONFDIR)/asterisk.ariuser)"
@@ -35,6 +38,13 @@ astupdate: $(ASTYAML) $(PEERSYAML)
 # Only create this if it doesn't exist
 $(EXTRAPEERS):
 	cp defaults/additionalpeers.yaml $@
+
+# This clobbers the file whenever the source is updated
+$(PJPEERDEFAULTS): defaults/pjpeerdefaults.yaml
+	cp $< $@
+
+$(PJDEFYAML): $(PJPEERDEFAULTS)
+	cp $< $@
 	
 $(PEERSYAML): $(EXTRAPEERS)
 	@echo Updating $@

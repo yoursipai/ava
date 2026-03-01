@@ -1,0 +1,13 @@
+# Defaults for pjsip settings.
+#
+# WARNING: This is code under development. Changing the file
+# in defaults will blow away your production file. Ask xrobau
+# in discord or something if you need help
+---
+pjpeerdefaults:
+  aicontext: default
+  aiprovider: local
+  allowaioverride: true
+  inboundcontext: to-ai
+
+
