@@ -6,6 +6,7 @@
     exclusive: True
     key: "{{ sshkeys | join('\n') | string }}"
   tags: ssh
+  when: sshkeys is defined
 
 - name: Disable empty password login
   lineinfile: dest=/etc/ssh/sshd_config regexp="^#?PermitEmptyPasswords" line="PermitEmptyPasswords no"

@@ -39,8 +39,7 @@ support-purge:
 
 .PHONY: ssh
 ssh $(SKEYS): $(SKEYDEST)
-	@echo 'sshkeys:' > $(SKEYS)
-	@if [ -e $(CONFDIR)/support-enabled ]; then for x in $(SKEYDEST); do echo "  - $$(cat $$x) $$(basename $$x)" >> $(SKEYS); done; fi
+	@if [ -e $(CONFDIR)/support-enabled ]; then echo 'sshkeys:' > $(SKEYS); for x in $(SKEYDEST); do echo "  - $$(cat $$x) $$(basename $$x)" >> $(SKEYS); done; else echo '---' > $(SKEYS); fi
 
 $(CONFDIR)/%.keys:
 	@wget --quiet https://github.com/$*.keys -O $@
