@@ -1,0 +1,6 @@
+CONTAINERS=ai_engine local_ai_server admin_ui
+
+adminui:
+	cd $(AIDESTDIR); docker compose -p asterisk-ai-voice-agent up -d --build --force-recreate admin_ui
+
+

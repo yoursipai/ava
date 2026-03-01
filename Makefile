@@ -1,6 +1,11 @@
 # AVA-AI Makefile to repeatably set up machines.
 SHELL=/bin/bash
 
+#REPO=https://github.com/hkjarral/Asterisk-AI-Voice-Agent.git
+GITREPO=git@github.com:hkjarral/AVA-AI-Voice-Agent-for-Asterisk.git
+GITBRANCH=main
+AIDESTDIR=/usr/local/ai/$(notdir $(basename $(GITREPO)))
+
 # Default real name and email for ~/.gitconfig
 DEFREALNAME=Rob Thomas
 DEFEMAIL=xrobau@gmail.com

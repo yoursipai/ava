@@ -1,0 +1,11 @@
+
+.PHONY: git git-pull
+git:
+	@echo Hi git and git-pull
+
+git-pull: | $(AIDESTDIR)/.git/config
+	cd $(AIDESTDIR); git pull; git checkout $(GITBRANCH)
+
+$(AIDESTDIR)/.git/config:
+	@mkdir -p $(AIDESTDIR)
+	@echo git checkout $(GITREPO) $(AIDESTDIR)
