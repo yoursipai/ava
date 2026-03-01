@@ -2,6 +2,7 @@
 ---
 - hosts: localhost
   roles:
-    - ubuntu-base
-    - docker
+#    - ubuntu-base
+    - nvidia
+#   - docker
 

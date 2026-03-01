@@ -1,0 +1,23 @@
+---
+- name: Install Nvidia packages
+  apt:
+    name:
+      - ubuntu-drivers-common
+      - alsa-utils
+    state: present
+  when: nvidiagpu is defined
+
+- name: Running ubuntu-drivers install thing
+  command:
+   argv:
+     - /usr/bin/ubuntu-drivers
+     - install
+   creates: /usr/bin/nvidia-smi
+  when: nvidiagpu is defined
+
+- name: Check if nvidia-smi works (If this fails, reboot)
+  command:
+   argv:
+     - /usr/bin/nvidia-smi
+  register: smiout
+  when: nvidiagpu is defined

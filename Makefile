@@ -45,6 +45,9 @@ setup: $(BINS) $(GITCONFIG) $(GROUPVARS)/all/cloudflare.yaml ansible-packages /e
 AVERS=1.0
 UAGENT=AVA-Endpoint-v$(AVERS)
 
+# If there's a NVidia GTX Card, use it
+NVIDIAENV=$(shell lspci | awk '/GeForce/ { print "-e nvidiagpu=true" }')
+
 include $(wildcard includes/Makefile.*)
 
 .PHONY: bins
@@ -54,12 +57,12 @@ bins $(BINS):
 .PHONY: me
 me: setup /etc/ansible.hostname
 	@MYIPS=$$(ip -o addr | egrep -v '(\ lo|\ docker)' | awk '/inet / { print $$4 }' | cut -d/ -f1 | paste -sd ','); \
-		echo ansible-playbook main.yml -l $$MYIPS; \
-		ansible-playbook main.yml -l $$MYIPS
+		echo ansible-playbook main.yml $(NVIDIAENV) -l $$MYIPS; \
+		ansible-playbook main.yml $(NVIDIAENV) -l $$MYIPS
 
 .PHONY: base
 base /etc/hosts: /etc/ansible.hostname | setup
-	$(ANSBIN) basesystem.yml -e hostname=$(shell cat /etc/ansible.hostname)
+	$(ANSBIN) basesystem.yml -e hostname=$(shell cat /etc/ansible.hostname) $(NVIDIAENV)
 
 .PHONY: fhostname
 fhostname /etc/ansible.hostname:
