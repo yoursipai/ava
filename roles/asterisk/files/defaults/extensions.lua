@@ -1,2 +1,1 @@
-; Empty file placed by AVA Install
-
+--- extensions.lua disabled

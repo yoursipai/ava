@@ -21,7 +21,7 @@
     - pjsip.identify.conf
     - pjsip.registration.conf
     - pjsip.transports.conf
-
+    - extensions_custom.conf
 
 - name: Copy default config files into place
   copy:
