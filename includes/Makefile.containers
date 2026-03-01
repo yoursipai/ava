@@ -1,6 +1,11 @@
 CONTAINERS=ai_engine local_ai_server admin_ui
+DOTENV=$(AIDESTDIR)/.env
 
-adminui:
+adminui: $(DOTENV)
 	cd $(AIDESTDIR); docker compose -p asterisk-ai-voice-agent up -d --build --force-recreate admin_ui
 
+.PHONY: dd
+dd $(DOTENV):
+	@echo need to make $(DOTENV)
+	cd $(AIDESTDIR); ./preflight.sh --apply-fixes
 
