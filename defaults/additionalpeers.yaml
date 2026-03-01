@@ -6,8 +6,8 @@
 # any other peers defined later
 ---
 pjpeerdefaults:
-  aicontext: AVACONTEXT
-  aiprovider: LOCAL
+  aicontext: default
+  aiprovider: local
   allowaioverride: true
   inboundcontext: to-ai
 
