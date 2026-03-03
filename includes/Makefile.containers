@@ -7,5 +7,14 @@ adminui: $(DOTENV)
 .PHONY: preflight
 preflight $(DOTENV):
 	@echo need to make $(DOTENV)
-	cd $(AIDESTDIR); ./preflight.sh --apply-fixes
+	cd $(AIDESTDIR); ./preflight.sh --apply-fixes --local-ai-full
+
+
+.PHONY: aiserver
+aiserver: $(DOTENV)
+	$(ANSBIN) basesystem.yml -e hostname=$(shell cat /etc/ansible.hostname) $(ANSENV) -t gpu
+	cd $(AIDESTDIR); docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build local_ai_server
+
+aiengine: $(DOTENV)
+	cd $(AIDESTDIR); docker compose -p asterisk-ai-voice-agent up -d ai_engine
 

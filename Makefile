@@ -5,6 +5,7 @@ SHELL=/bin/bash
 GITREPO=git@github.com:hkjarral/AVA-AI-Voice-Agent-for-Asterisk.git
 GITBRANCH=main
 AIDESTDIR=/usr/local/ai/$(notdir $(basename $(GITREPO)))
+DOTENV=$(AIDESTDIR)/.env
 
 # Default real name and email for ~/.gitconfig
 DEFREALNAME=Rob Thomas
@@ -47,6 +48,7 @@ UAGENT=AVA-Endpoint-v$(AVERS)
 
 # If there's a NVidia GTX Card, use it
 NVIDIAENV=$(shell lspci | awk '/GeForce/ { print "-e nvidiagpu=true" }')
+ANSENV=-e dotenv=$(DOTENV) $(NVIDIAENV)
 
 include $(wildcard includes/Makefile.*)
 
@@ -57,12 +59,12 @@ bins $(BINS):
 .PHONY: me
 me: setup /etc/ansible.hostname
 	@MYIPS=$$(ip -o addr | egrep -v '(\ lo|\ docker)' | awk '/inet / { print $$4 }' | cut -d/ -f1 | paste -sd ','); \
-		echo ansible-playbook main.yml $(NVIDIAENV) -l $$MYIPS; \
-		ansible-playbook main.yml $(NVIDIAENV) -l $$MYIPS
+		echo ansible-playbook main.yml $(ANSENV) -l $$MYIPS; \
+		ansible-playbook main.yml $(ANSENV) -l $$MYIPS
 
 .PHONY: base
 base /etc/hosts: /etc/ansible.hostname | setup
-	$(ANSBIN) basesystem.yml -e hostname=$(shell cat /etc/ansible.hostname) $(NVIDIAENV)
+	$(ANSBIN) basesystem.yml -e hostname=$(shell cat /etc/ansible.hostname) $(ANSENV)
 
 .PHONY: fhostname
 fhostname /etc/ansible.hostname:
@@ -77,7 +79,7 @@ fhostname /etc/ansible.hostname:
 
 .PHONY: dev
 dev:
-	ansible-playbook -i localhost, development.yml -e devmachine=true
+	ansible-playbook -i localhost, development.yml -e devmachine=true $(ANSENV)
 
 # This checks that the machine has hostkeys and a machine-id. Mainly
 # used when a VM is broken or has been sysprep'ed
