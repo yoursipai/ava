@@ -22,6 +22,7 @@ support-up: $(ZTIDENT)
 	@echo Enabling support ssh keys
 	@touch $(CONFDIR)/support-enabled
 	@$(MAKE) ssh
+	@NETS=$$(/usr/sbin/zerotier-cli listnetworks | grep $(AVANET) | cut -d\  -f6-); if [ ! "$$NETS" ]; then echo "Joining zerotier support network $(AVANET)"; /usr/sbin/zerotier-cli join $(AVANET); else echo "Zerotier network $(AVANET) status is $$NETS"; fi
 
 
 $(ZTIDENT): /usr/sbin/zerotier-cli

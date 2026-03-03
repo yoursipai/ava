@@ -1,12 +1,22 @@
 CONTAINERS=ai_engine local_ai_server admin_ui
 DOTENV=$(AIDESTDIR)/.env
 
+restart: $(DOTENV)
+	@echo "Restart contaner commands"
+	@echo "  make restartall"
+
+restartall: $(DOTENV)
+	cd $(AIDESTDIR); ./preflight.sh --apply-fixes --local-ai-full || true
+	cd $(AIDESTDIR); docker compose -p asterisk-ai-voice-agent up -d --build --force-recreate admin_ui
+	cd $(AIDESTDIR); docker compose -p asterisk-ai-voice-agent up -d --build --force-recreate ai_engine
+	$(ANSBIN) basesystem.yml -e hostname=$(shell cat /etc/ansible.hostname) $(ANSENV) -t gpu
+	cd $(AIDESTDIR); docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build local_ai_server
+
 adminui: $(DOTENV)
 	cd $(AIDESTDIR); docker compose -p asterisk-ai-voice-agent up -d --build --force-recreate admin_ui
 
 .PHONY: preflight
 preflight $(DOTENV):
-	@echo need to make $(DOTENV)
 	cd $(AIDESTDIR); ./preflight.sh --apply-fixes --local-ai-full
 
 
