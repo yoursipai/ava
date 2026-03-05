@@ -3,15 +3,17 @@ DOTENV=$(AIDESTDIR)/.env
 
 restart: $(DOTENV)
 	@echo "Restart contaner commands"
-	@echo "  make restartall"
+	@echo "  make rebuildall"
 
-restartall: $(DOTENV)
+.PHONY: rebuildall
+rebuildall: $(DOTENV)
 	cd $(AIDESTDIR); ./preflight.sh --apply-fixes --local-ai-full || true
 	cd $(AIDESTDIR); docker compose -p asterisk-ai-voice-agent up -d --build --force-recreate admin_ui
 	cd $(AIDESTDIR); docker compose -p asterisk-ai-voice-agent up -d --build --force-recreate ai_engine
 	$(ANSBIN) basesystem.yml -e hostname=$(shell cat /etc/ansible.hostname) $(ANSENV) -t gpu
 	cd $(AIDESTDIR); docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build local_ai_server
 
+.PHONY: adminui
 adminui: $(DOTENV)
 	cd $(AIDESTDIR); docker compose -p asterisk-ai-voice-agent up -d --build --force-recreate admin_ui
 
@@ -25,6 +27,7 @@ aiserver: $(DOTENV)
 	$(ANSBIN) basesystem.yml -e hostname=$(shell cat /etc/ansible.hostname) $(ANSENV) -t gpu
 	cd $(AIDESTDIR); docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build local_ai_server
 
+.PHONY: aiengine
 aiengine: $(DOTENV)
 	cd $(AIDESTDIR); docker compose -p asterisk-ai-voice-agent up -d ai_engine
 

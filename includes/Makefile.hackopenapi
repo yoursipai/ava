@@ -1,0 +1,14 @@
+OPENAIREAL=https://api.openai.com/v1
+OPENAIHACK=http://localhost:8001/v1
+OPENAIDIRS=cli tests config src admin_ui
+
+.PHONY: hackopenai unhackopenai
+hackopenai:
+	@cd $(AIDESTDIR); for f in $$(grep -lR $(OPENAIREAL) $(OPENAIDIRS)); do echo "Modifying $$f"; sed -i 's!$(OPENAIREAL)!$(OPENAIHACK)!g' $$f; done
+	@echo "You want to run 'make rebuildall' now"
+
+unhackopenai:
+	@cd $(AIDESTDIR); for f in $$(grep -lR $(OPENAIHACK) $(OPENAIDIRS)); do echo "Reverting $$f"; sed -i 's!$(OPENAIHACK)!$(OPENAIREAL)!g' $$f; done
+	@echo "You want to run 'make rebuildall' now"
+
+
