@@ -28,12 +28,12 @@ asterisk: $(ASTGROUPVARS)
 .PHONY: astinstall
 astinstall: $(ASTYAML) $(PEERSYAML)
 	@echo Installing asterisk on localhost
-	ansible-playbook -i localhost, asterisk.yml -e uagent=$(UAGENT)
+	ansible-playbook -i localhost, asterisk.yml $(ANSENV)
 
 .PHONY: astupdate
 astupdate: $(ASTYAML) $(PEERSYAML)
 	@echo Updating core asterisk config files only
-	ansible-playbook -i localhost, asterisk.yml -e fastupdate=true -e uagent=$(UAGENT)
+	ansible-playbook -i localhost, asterisk.yml -e fastupdate=true $(ANSENV)
 
 # Only create this if it doesn't exist
 $(EXTRAPEERS):

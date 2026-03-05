@@ -46,9 +46,9 @@ setup: $(BINS) $(GITCONFIG) $(GROUPVARS)/all/cloudflare.yaml ansible-packages /e
 AVERS=1.0
 UAGENT=AVA-Endpoint-v$(AVERS)
 
-# If there's a NVidia GTX Card, use it
-NVIDIAENV=$(shell lspci | awk '/GeForce/ { print "-e nvidiagpu=true" }')
-ANSENV=-e dotenv=$(DOTENV) $(NVIDIAENV)
+# If there's a NVidia/GeForce/Quadro Card, use it.
+NVIDIAENV=$(shell lspci | egrep -q '\[(GeForce|Quadr)' && echo '-e nvidiagpu=true')
+ANSENV=-e dotenv=$(DOTENV) -e uagent=$(UAGENT) $(NVIDIAENV)
 
 include $(wildcard includes/Makefile.*)
 
@@ -63,7 +63,7 @@ me: setup /etc/ansible.hostname
 		ansible-playbook main.yml $(ANSENV) -l $$MYIPS
 
 .PHONY: base
-base /etc/hosts: /etc/ansible.hostname | setup
+base /etc/hosts: /etc/ansible.hostname | setup $(ASTYAML) $(PEERSYAML)
 	$(ANSBIN) basesystem.yml -e hostname=$(shell cat /etc/ansible.hostname) $(ANSENV)
 
 .PHONY: fhostname
