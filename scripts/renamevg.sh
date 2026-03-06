@@ -18,22 +18,23 @@ if [ ! "$n" ]; then
 	exit
 fi
 
-echo "Renaming vg '$p' to '$n'"
-
-echo "Replacing '/dev/mapper/$p' in: "
+alt=$(echo $p | sed 's/-/--/g')
+echo "Renaming vg '$p' (aka $alt) to '$n' in:"
 echo "  /boot/grub/grub.cfg"
 sed --in-place=.bak "s!/dev/mapper/$p!/dev/mapper/$n!g" /boot/grub/grub.cfg
+sed --in-place=.bak "s!/dev/mapper/$alt!/dev/mapper/$n!g" /boot/grub/grub.cfg
 echo "  /etc/fstab"
 sed --in-place=.bak "s!/dev/mapper/$p!/dev/mapper/$n!g" /etc/fstab
+sed --in-place=.bak "s!/dev/mapper/$alt!/dev/mapper/$n!g" /etc/fstab
 
-for x in /etc/udev/rules.d/$p-*; do
-	if [ ! -e "$x" ]; then
-		continue
-	fi
-	uf=$(echo $x | sed "s/$p/$n/")
-	echo Renaming "$x" to "$uf"
-	mv $x $uf
-	sed -i "s/$p-/$n-/g" $uf
+for x in /etc/udev/rules.d/$p-* /etc/udev/rules.d/$alt-*; do
+        if [ ! -e "$x" ]; then
+                continue
+        fi
+        uf=$(echo $x | sed -e "s/$p/$n/" -e "s/$alt/$n/")
+        echo Renaming "$x" to "$uf"
+        mv $x $uf
+        sed -i -e "s/$p-/$n-/g" -e "s/$alt-/$n-/g" $uf
 done
 
 echo "Renaming VG"
