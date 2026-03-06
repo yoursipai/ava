@@ -41,7 +41,7 @@ CONFDIR=$(ANSDIR)/config
 
 # This is first so that `make` by itself always runs `make setup`
 .PHONY: setup
-setup: $(BINS) $(GITCONFIG) $(GROUPVARS)/all/cloudflare.yaml ansible-packages /etc/rc.local fixvim /.rootvolok
+setup: $(BINS) $(GITCONFIG) $(GROUPVARS)/all/cloudflare.yaml ansible-packages /etc/rc.local $(VIMFIXED) /.rootvolok
 # /.rootvolok is in includes/Makefile.volumes
 
 AVERS=1.0

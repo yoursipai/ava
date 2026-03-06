@@ -37,16 +37,27 @@
 		echo "touch /.rootvolok"; \
 	fi
 
-VOLNAME=dockervol
+DOCKERLV=dockervol
 /.dockervolexists:
 	@VGNAME=$(shell vgdisplay -C | awk 'NR==2 { print $$1 }'); \
 	if [ "$$VGNAME" == "ubuntu-vg" ]; then \
 		echo "** Warning: Ignoring dockervol check, vgname invalid"; \
 	else \
-		DLV=$(shell lvdisplay -C | awk '/$(VOLNAME)/ { print $$1 }'); \
+		DLV=$(shell lvdisplay -C | awk '/$(DOCKERLV)/ { print $$1 }'); \
+		mkdir -p /var/lib/docker; \
 		if [ ! "$$DLV" ]; then \
-			echo "Docker Logical Volume not created! Create it. Example:"; \
-			echo "  lvcreate -n $(DOCKERVOL) -L100G $$VGNAME"; \
+			echo "Docker Logical Volume not created! Example:"; \
+			echo "  lvcreate -n $(DOCKERLV) -L100G $$VGNAME"; \
+			echo "  mkfs.ext4 /dev/$$VGNAME/$(DOCKERLV)"; \
+			echo "  echo \"/dev/$$VGNAME/$(DOCKERLV) /var/lib/docker ext4 defaults 0 0\" >> /etc/fstab"; \
+			echo "  mount -a"; \
+			echo "  systemctl daemon-reload"; \
+			echo ""; \
+			echo "To ignore this error and continue, run 'touch /.dockervolexists' and then 'make setup' again"; \
+			echo ""; \
+			exit 1; \
+		else \
+			echo 'touch /.dockervolexists'; \
 		fi \
 	fi
 
