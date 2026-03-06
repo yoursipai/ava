@@ -5,6 +5,22 @@ restart: $(DOTENV)
 	@echo "Restart contaner commands"
 	@echo "  make rebuildall"
 
+.PHONY: stop prune
+stop:
+	@echo Stopping Ava Containers.
+	@for x in $(CONTAINERS); do \
+		echo -n "Stopping $$x ... "; \
+		C=$$(docker ps -a | grep $$x); \
+		if [ "$$C" ]; then docker rm -f $$x; echo "Stopped"; else echo "Not running"; fi; \
+	done
+
+prune:
+	@echo Pruning all docker containers
+	@for x in $$(docker ps -a --format '{{.Names}}'); do \
+		echo -n "Pruning $$x ... "; \
+		docker rm -f $$x; \
+	done
+
 .PHONY: rebuildall
 rebuildall: $(DOTENV)
 	cd $(AIDESTDIR); ./preflight.sh --apply-fixes --local-ai-full || true

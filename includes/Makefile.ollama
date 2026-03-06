@@ -1,11 +1,24 @@
 OLLAMA=/usr/local/bin/ollama
 OINST=https://ollama.com/install.sh
 LOCALINST=/usr/local/etc/install.sh
+KNOWNMODELS=$(notdir $(wildcard models/Modelfile.*))
+DESTMODELS=$(addprefix models/.build.,$(KNOWNMODELS))
+DEFMODEL=model1
+# Comment this out if you want to see thinking
+OTHINK=--think=false
 
 .PHONY: ollama ollama-update
-ollama: $(OLLAMA)
-	@echo Starting Ollama
-	$(OLLAMA)
+ollama: $(OLLAMA) $(DESTMODELS)
+	@echo Starting Ollama using model $(DEFMODEL)
+	$(OLLAMA) run $(DEFMODEL) $(OTHINK)
+
+
+.PHONY: models
+models: $(DESTMODELS)
+	@echo Known ollama models in models directory: $(KNOWNMODELS)
+
+models/.build.%: models/%
+	@SRC=$<; MNAME=$(patsubst Modelfile.%,%,$(notdir $<)); echo Updating model $$MNAME from $$SRC; ollama create $$MNAME -f $$SRC; touch $@
 
 ollama-update: update-install
 	@echo Updating ollama using $(LOCALINST)
