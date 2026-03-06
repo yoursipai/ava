@@ -107,6 +107,9 @@
     line: "{{ item.l }}"
   with_items:
     - { r: '^#? ?LOCAL_LLM_GPU_LAYERS', l: 'LOCAL_LLM_GPU_LAYERS=-1' }
+    - { r: '^#? ?MELOTTS_VOICE', l: 'MELOTTS_VOICE=EN-US' }
+    - { r: '^#? ?MELOTTS_DEVICE', l: 'MELOTTS_DEVICE=cuda' }
+    - { r: '^#? ?MELOTTS_SPEED', l: 'MELOTTS_SPEED=1.0' }
   when: nvidiagpu is defined
   tags:
     - gpu

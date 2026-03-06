@@ -1,5 +1,17 @@
 CONTAINERS=ai_engine local_ai_server admin_ui
 DOTENV=$(AIDESTDIR)/.env
+DOCKERVOLROOT=/usr/local/ai/volumes
+DOCKERVOLS=models data asterisk_media
+DOCKERVOLDESTS=$(addprefix $(AIDESTDIR)/.dockervol-,$(DOCKERVOLS))
+
+$(AIDESTDIR)/.dockervol-%:
+	@mkdir -p $(DOCKERVOLROOT)/$*
+	@V=$$(docker volume ls | grep ' $*'); if [ ! "$$V" ]; then echo -n "Creating docker volume "; docker volume create --opt type=none --opt o=bind --opt device=$(DOCKERVOLROOT)/$* $*; fi
+	@V=$$(docker volume ls | grep ' $*'); if [ ! "$$V" ]; then echo "Could not create docker volume $*, aborting"; exit 9; else touch $@; fi
+
+.PHONY: dockervols
+dockervols: $(DOCKERVOLDESTS)
+	@echo Volumes created. Run 'make patch' to fix compose files
 
 restart: $(DOTENV)
 	@echo "Restart contaner commands"
@@ -21,6 +33,17 @@ prune:
 		docker rm -f $$x; \
 	done
 
+.PHONY: patch
+patch:
+	@echo Unofficial patches
+	sed -i 's/INCLUDE_MELOTTS:-false/INCLUDE_MELOTTS:-true/' $(AIDESTDIR)/docker*yml
+	sed -i 's/INCLUDE_MELOTTS=false/INCLUDE_MELOTTS=true/' $(AIDESTDIR)/local_ai_server/Dockerfile*
+	grep -q 'volumes: # autovolumes' $(AIDESTDIR)/docker-compose.yml || echo 'volumes: # autovolumes' >> $(AIDESTDIR)/docker-compose.yml
+	for v in $(DOCKERVOLS); do \
+		sed -i "s/- .\/$$v:/- $$v:/" $(AIDESTDIR)/docker-compose.yml; \
+		grep -q "$$v: # autovol-$$v" $(AIDESTDIR)/docker-compose.yml || echo -e "  $$v: # autovol-$$v\n    external: true" >> $(AIDESTDIR)/docker-compose.yml; \
+	done
+
 .PHONY: rebuildall
 rebuildall: $(DOTENV)
 	cd $(AIDESTDIR); ./preflight.sh --apply-fixes --local-ai-full || true
@@ -31,11 +54,12 @@ rebuildall: $(DOTENV)
 
 .PHONY: adminui
 adminui: $(DOTENV)
+	cd $(AIDESTDIR); ./preflight.sh --apply-fixes --local-ai-full || true
 	cd $(AIDESTDIR); docker compose -p asterisk-ai-voice-agent up -d --build --force-recreate admin_ui
 
 .PHONY: preflight
-preflight $(DOTENV):
-	cd $(AIDESTDIR); ./preflight.sh --apply-fixes --local-ai-full
+preflight $(DOTENV): $(DOCKERVOLDESTS)
+	cd $(AIDESTDIR); ./preflight.sh --apply-fixes --local-ai-full || true
 
 
 .PHONY: aiserver
