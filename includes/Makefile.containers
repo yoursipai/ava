@@ -4,8 +4,9 @@ DOCKERVOLROOT=/usr/local/ai/volumes
 DOCKERVOLS=models data asterisk_media
 DOCKERVOLDESTS=$(addprefix $(AIDESTDIR)/.dockervol-,$(DOCKERVOLS))
 
+# UID/GID 1000 is terrible, but it's hardcoded and needs to be fixed
 $(AIDESTDIR)/.dockervol-%:
-	@mkdir -p $(DOCKERVOLROOT)/$*
+	@mkdir -p $(DOCKERVOLROOT)/$*; chown 1000:1000 $(DOCKERVOLROOT)/$*
 	@V=$$(docker volume ls | grep ' $*'); if [ ! "$$V" ]; then echo -n "Creating docker volume "; docker volume create --opt type=none --opt o=bind --opt device=$(DOCKERVOLROOT)/$* $*; fi
 	@V=$$(docker volume ls | grep ' $*'); if [ ! "$$V" ]; then echo "Could not create docker volume $*, aborting"; exit 9; else touch $@; fi
 
