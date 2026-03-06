@@ -23,8 +23,8 @@ ROLES=gantsign.golang geerlingguy.php-versions jhu-sheridan-libraries.postfix-sm
 COLLECTIONS=community/general ansible/posix community/docker community/mysql
 
 # Required bins and packages - if any bins are missing, it installs all packages
-BINS=$(ANSBIN) /usr/bin/vim /usr/bin/ping /usr/bin/netstat /usr/bin/wget /usr/bin/unzip /usr/bin/uuid
-PKGS=ansible vim iputils-ping net-tools wget unzip uuid
+BINS=$(ANSBIN) /usr/bin/vim /usr/bin/ping /usr/bin/netstat /usr/bin/wget /usr/bin/unzip /usr/bin/uuid /usr/bin/bc
+PKGS=ansible vim iputils-ping net-tools wget unzip uuid bc
 
 ANSIBLE_HOST_KEY_CHECKING=False
 export ANSIBLE_HOST_KEY_CHECKING
@@ -41,7 +41,8 @@ CONFDIR=$(ANSDIR)/config
 
 # This is first so that `make` by itself always runs `make setup`
 .PHONY: setup
-setup: $(BINS) $(GITCONFIG) $(GROUPVARS)/all/cloudflare.yaml ansible-packages /etc/rc.local fixvim
+setup: $(BINS) $(GITCONFIG) $(GROUPVARS)/all/cloudflare.yaml ansible-packages /etc/rc.local fixvim /.rootvolok
+# /.rootvolok is in includes/Makefile.volumes
 
 AVERS=1.0
 UAGENT=AVA-Endpoint-v$(AVERS)

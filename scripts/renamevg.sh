@@ -11,7 +11,7 @@ if [ ! "$FIRST" ]; then
 fi
 
 read -e -i "$FIRST" -p "Volume group to rename: " p
-read -e -i pbx -p "New name of volume group: " n
+read -e -i avavg -p "New name of volume group: " n
 
 if [ ! "$n" ]; then
 	echo "I need a new name"
