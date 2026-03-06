@@ -44,7 +44,6 @@ CONFDIR=$(ANSDIR)/config
 REQS=$(BINS) $(GITCONFIG) $(GROUPVARS)/all/cloudflare.yaml ansible-packages /etc/rc.local | $(VIMFIXED) /.rootvolok
 .PHONY: setup
 setup: $(REQS)
-	@echo $(OLLAMA)
 	@echo First stage of system setup is complete. You can now use the following commands:
 	@echo "  make base     - Installs all required packages and docker and stuff"
 	@echo "  make asterisk - Displays asterisk config"
