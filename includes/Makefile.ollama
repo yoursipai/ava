@@ -1,0 +1,26 @@
+OLLAMA=/usr/local/bin/ollama
+OINST=https://ollama.com/install.sh
+LOCALINST=/usr/local/etc/install.sh
+
+.PHONY: ollama ollama-update
+ollama: $(OLLAMA)
+	@echo Starting Ollama
+	$(OLLAMA)
+
+ollama-update: update-install
+	@echo Updating ollama using $(LOCALINST)
+	@$(LOCALINST)
+	@touch -r $(OLLAMA) $(LOCALINST)
+
+$(OLLAMA): $(LOCALINST)
+	@$(LOCALINST)
+	@touch -r $(OLLAMA) $(LOCALINST)
+
+.PHONY: update-install
+update-install $(LOCALINST):
+	@mkdir -p $(dir $(LOCALINST))
+	@rm -f $(LOCALINST)
+	@echo Downloading install.sh from $(OINST)
+	@wget -q $(OINST) -O $(LOCALINST)
+	@chmod 755 $(LOCALINST)
+

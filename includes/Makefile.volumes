@@ -1,6 +1,6 @@
 # If the root vol is 102626232 that's 100g. It should be increasted
 # If the root vol name is /dev/mapper/ubuntu--vg-ubuntu--lv, that should be changed, too
-/.rootvolok: /.dockervolexists
+/.rootvolok: | /.dockervolexists
 	@ISOK=OK; ROOTVOL=$(shell df / | awk '/^\/dev/ { print $$1 }'); ROOTBLOCKS=$(shell df / | awk '/^\/dev/ { print $$2 }'); \
 	if [ "$$ROOTVOL" == "/dev/mapper/ubuntu--vg-ubuntu--lv" ]; then \
 		echo "** ERROR: ROOT VOLUME GROUP NAME IS BAD ** "; \
@@ -57,7 +57,7 @@ DOCKERLV=dockervol
 			echo ""; \
 			exit 1; \
 		else \
-			echo 'touch /.dockervolexists'; \
+			touch /.dockervolexists; \
 		fi \
 	fi
 

@@ -77,14 +77,24 @@
   tags:
     - gpu
 
-- name: nvidia-ctk
+- name: Check for docker tool being installed to /etc/docker/daemon.json
+  shell:
+    cmd: grep nvidia-container-runtime /etc/docker/daemon.json
+  register: ncr
+  when: nvidiagpu is defined
+  failed_when: false
+  changed_when: false
+  tags:
+    - gpu
+
+- name: Put nvidia runtime into docker daemon.json
   command:
     argv:
       - nvidia-ctk
       - runtime
       - configure
       - --runtime=docker
-  when: toolinstall is defined and toolinstall.changed
+  when: toolinstall is defined and ( toolinstall.changed or ncr.rc == 1 )
   notify:
     - restart-docker
   tags:

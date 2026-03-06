@@ -1,0 +1,5 @@
+.PHONY: gpu
+gpu:
+	$(ANSBIN) basesystem.yml -e hostname=$(shell cat /etc/ansible.hostname) $(ANSENV) -t gpu
+
+

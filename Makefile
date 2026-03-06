@@ -40,9 +40,17 @@ GROUPVARS=$(ANSDIR)/group_vars
 CONFDIR=$(ANSDIR)/config
 
 # This is first so that `make` by itself always runs `make setup`
-.PHONY: setup
-setup: $(BINS) $(GITCONFIG) $(GROUPVARS)/all/cloudflare.yaml ansible-packages /etc/rc.local $(VIMFIXED) /.rootvolok
 # /.rootvolok is in includes/Makefile.volumes
+REQS=$(BINS) $(GITCONFIG) $(GROUPVARS)/all/cloudflare.yaml ansible-packages /etc/rc.local | $(VIMFIXED) /.rootvolok
+.PHONY: setup
+setup: $(REQS)
+	@echo $(OLLAMA)
+	@echo First stage of system setup is complete. You can now use the following commands:
+	@echo "  make base     - Installs all required packages and docker and stuff"
+	@echo "  make asterisk - Displays asterisk config"
+	@echo "  make ollama   - Installs ollama locally and starts a shell"
+	@echo "  make adminui  - Create the AVA admin ui"
+	@echo ""
 
 AVERS=1.0
 UAGENT=AVA-Endpoint-v$(AVERS)
@@ -63,8 +71,10 @@ me: setup /etc/ansible.hostname
 		echo ansible-playbook main.yml $(ANSENV) -l $$MYIPS; \
 		ansible-playbook main.yml $(ANSENV) -l $$MYIPS
 
+# DIDESTDIR is in includes/Makefile.git
 .PHONY: base
-base /etc/hosts: /etc/ansible.hostname | setup $(ASTYAML) $(PEERSYAML)
+base /etc/hosts: /etc/ansible.hostname $(ASTYAML) $(PEERSYAML) $(AIDESTDIR)/.git/config $(DOTENV) $(REQS)
+	@echo Installing basesystem packages from basesystem.yml
 	$(ANSBIN) basesystem.yml -e hostname=$(shell cat /etc/ansible.hostname) $(ANSENV)
 
 .PHONY: fhostname

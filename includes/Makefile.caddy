@@ -24,13 +24,13 @@ check: $(CADDYBIN)
 fmt: $(CADDYBIN)
 	$< fmt --overwrite
 
-.PHONY: force-build build
-build: $(CADDYBIN)
+.PHONY: force-gobuild gobuild
+gobuild: $(CADDYBIN)
 
 .cloudflare_ips:
 	curl -s https://api.cloudflare.com/client/v4/ips | jq -r '.result | .ipv4_cidrs+.ipv6_cidrs | join(" ")' > $@
 
-force-build $(CADDYBIN): /usr/bin/xcaddy
+force-gobuild $(CADDYBIN): /usr/bin/xcaddy
 	/usr/bin/xcaddy build $(addprefix --with ,$(CADDYPKGS)) --output $(CADDYBIN)
 
 .PHONY: dirs $(CADDYDIRS)

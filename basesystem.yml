@@ -3,7 +3,7 @@
 - hosts: localhost
   roles:
     - ubuntu-base
-    - nvidia
-    - asterisk
     - docker
+    - asterisk
+    - nvidia
 

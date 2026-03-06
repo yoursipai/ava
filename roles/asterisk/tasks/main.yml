@@ -22,6 +22,8 @@
     - pjsip.registration.conf
     - pjsip.transports.conf
     - extensions_custom.conf
+  notify:
+    - restart-asterisk
 
 - name: Copy default config files into place
   copy:
@@ -33,5 +35,6 @@
   with_fileglob:
     - "defaults/*"
   when: fastupdate is not defined
-
+  notify:
+    - reload-asterisk
 
